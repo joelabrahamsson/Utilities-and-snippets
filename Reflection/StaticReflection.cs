@@ -20,6 +20,11 @@ namespace Reflection
             return GetMemberName(expression.Body);
         }
 
+        public static string GetMemberName<T>(this T instance, Expression<Action<T>> expression)
+        {
+            return GetMemberName(expression);
+        }
+
         public static string GetMemberName<T>(Expression<Action<T>> expression)
         {
             if (expression == null)

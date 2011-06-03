@@ -26,7 +26,7 @@ namespace Specifications.Reflection
         static string returnedName;
 
         Because of
-            = () => returnedName = StaticReflection.GetMemberName<Exception>(s => s.Data);
+            = () => returnedName = StaticReflection.GetMemberName<Exception>(x => x.Data);
 
         It should_return_the_name_of_the_property
             = () => returnedName.ShouldEqual(ExpectedName);
