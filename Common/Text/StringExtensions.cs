@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Common.Text
 {
@@ -14,15 +13,28 @@ namespace Common.Text
         private static readonly HashSet<char> DefaultNonWordCharacters = new HashSet<char> { ',', '.', ':', ';' };
 
         /// <summary>
-        /// 
+        /// Returns a substring from the start of <paramref name="value"/> no 
+        /// longer than <paramref name="length"/>.
+        /// Returning only whole words is favored over returning a string that 
+        /// is exactly <paramref name="length"/> long. 
         /// </summary>
-        /// <param name="value"></param>
-        /// <param name="length"></param>
-        /// <param name="nonWordCharacters"></param>
-        /// <returns></returns>
-        /// <exception cref="System.ArgumentException">Thrown when <paramref name="length"/> is negative</exception>
-        /// <exception cref="System.ArgumentNullException">Thrown when <paramref name="value"/> is null</exception>
-        public static string CropWholeWords(this string value, int length, HashSet<char> nonWordCharacters = null)
+        /// <param name="value">The original string from which the substring 
+        /// will be returned.</param>
+        /// <param name="length">The maximum length of the substring.</param>
+        /// <param name="nonWordCharacters">Characters that, while not whitespace, 
+        /// are not considered part of words and therefor can be removed from a 
+        /// word in the end of the returned value. 
+        /// Defaults to ",", ".", ":" and ";" if null.</param>
+        /// <exception cref="System.ArgumentException">
+        /// Thrown when <paramref name="length"/> is negative
+        /// </exception>
+        /// <exception cref="System.ArgumentNullException">
+        /// Thrown when <paramref name="value"/> is null
+        /// </exception>
+        public static string CropWholeWords(
+            this string value, 
+            int length, 
+            HashSet<char> nonWordCharacters = null)
         {
             if (value == null)
             {
@@ -33,124 +45,48 @@ namespace Common.Text
             {
                 throw new ArgumentException("Negative values not allowed.", "length");
             }
-
+            
             if (nonWordCharacters == null)
             {
                 nonWordCharacters = DefaultNonWordCharacters;
             }
 
-            //ALT3
-            if (length > value.Length)
+            if (length >= value.Length)
             {
-                length = value.Length;
+                return value;
             }
             int end = length;
 
-            bool multipleWords = false;
             for (int i = end; i > 0; i--)
             {
-                if (value.Length > i && value[i] == ' ')
-                {
-                    multipleWords = true;
-                }
-
-                if (value.Length == length)
+                if (value[i].IsWhitespace())
                 {
                     break;
                 }
 
-                if (value.Length > i && (value[i] == ' ' || (nonWordCharacters.Contains(value[i]) && (value.Length == i + 1 || value[i + 1] == ' '))))
+                if (nonWordCharacters.Contains(value[i]) && (value.Length == i + 1 || value[i + 1] == ' '))
                 {
+                    //Removing a character that isn't whitespace but not part of the word either (ie ".")
+                    //given that the character is followed by whitespace or the end of the string makes it
+                    //possible to include the word, so we do that.
                     break;
                 }
                 end--;
             }
 
-            if (end == 0 && !multipleWords)
+            if (end == 0)
             {
+                //If the first word is longer than the length we favor 
+                //returning it as cropped over returning nothing at all.
                 end = length;
             }
 
             return value.Substring(0, end);
-
-            //ALT2
-            //int end = 0;
-            //if (length > value.Length)
-            //{
-            //    length = value.Length;
-            //}
-            //bool multipleWords = false;
-            //int lastWordEnd = 0;
-            //for (int i = 0; i < length; i++)
-            //{
-            //    end++;
-            //    if (value.Length > length && value[i + 1] == ' ')
-            //    {
-            //        lastWordEnd = end;
-            //        multipleWords = true;
-            //    }
-            //    if (i + 1 == length && value.Length > length && !nonWordCharacters.Contains(value[i + 1]) && multipleWords)
-            //    {
-            //        end = lastWordEnd;
-            //    }
-            //}
-
-            //return value.Substring(0, end);
-
-            //ALT1
-            //if (length > value.Length)
-            //{
-            //    return value;
-            //}
-
-            //if (nonWordCharacters == null)
-            //{
-            //    nonWordCharacters = defaultNonWordCharacters;
-            //}
-
-            //var words = value.Split(new[] {' '});
-            //var buffer = new StringBuilder();
-            //foreach (var word in words)
-            //{
-            //    if (buffer.Length == 0 && word.Length >= length)
-            //    {
-            //        buffer.Append(word.Substring(0, length));
-            //    }
-
-            //    var wordToInsert = word;
-            //    if (buffer.Length + word.Length + 1 > length)
-            //    {
-            //        if (nonWordCharacters.Contains(wordToInsert[wordToInsert.Length-1]) && buffer.Length + wordToInsert.Length <= length)
-            //        {
-            //            wordToInsert = wordToInsert.Substring(0, wordToInsert.Length - 1);
-            //        }
-            //        else
-            //        {
-            //            break;
-            //        }
-            //    }
-
-            //    if (buffer.Length > 0)
-            //    {
-            //        buffer.Append(" ");
-            //    }
-
-            //    buffer.Append(wordToInsert);
-            //}
-            //return buffer.ToString();
         }
 
-        public static bool EndsWith(this string fullString, HashSet<char> characters)
+        private static bool IsWhitespace(this char character)
         {
-            foreach (var character in characters)
-            {
-                if (fullString[fullString.Length - 1].Equals(character))
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return character == ' ' || character == '\n' || character == '\t';
         }
     }
 }

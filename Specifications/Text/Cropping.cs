@@ -212,27 +212,89 @@ namespace Specifications.Text
     }
 
     [Subject(typeof(StringExtensions), "CropWholeWords")]
-    public class when_invoked_with_a_fairly_long_string_ten_thousand_times
+    public class given_the_string_yellow_bananas_period_apples_and_length_15
+    {
+        static string input = "yellow bananas.apples";
+        static string output;
+
+        Because of
+            = () => output = input.CropWholeWords(14);
+
+        It should_return_yellow
+            = () => output.ShouldEqual("yellow");
+    }
+
+    [Subject(typeof(StringExtensions), "CropWholeWords")]
+    public class given_the_string_yellow___bananas_and_length_16
+    {
+        static string input = "yellow   bananas";
+        static string output;
+
+        Because of
+            = () => output = input.CropWholeWords(16);
+
+        It should_return_the_same_string
+            = () => output.ShouldEqual(input);
+    }
+
+    [Subject(typeof(StringExtensions), "CropWholeWords")]
+    public class given_the_string_yellow_linebreak_bananas_and_length_14
+    {
+        static string input = "yellow\nbananas";
+        static string output;
+
+        Because of
+            = () => output = input.CropWholeWords(14);
+
+        It should_return_the_same_string
+            = () => output.ShouldEqual(input);
+    }
+
+    [Subject(typeof(StringExtensions), "CropWholeWords")]
+    public class given_the_string_yellow_linebreak_bananas_and_length_13
+    {
+        static string input = "yellow\nbananas";
+        static string output;
+
+        Because of
+            = () => output = input.CropWholeWords(13);
+
+        It should_return_yellow
+            = () => output.ShouldEqual("yellow");
+    }
+
+    [Subject(typeof(StringExtensions), "CropWholeWords")]
+    public class given_the_string_yellow_tab_bananas_and_length_13
+    {
+        static string input = "yellow\tbananas";
+        static string output;
+
+        Because of
+            = () => output = input.CropWholeWords(13);
+
+        It should_return_yellow
+            = () => output.ShouldEqual("yellow");
+    }
+
+    [Subject(typeof(StringExtensions), "CropWholeWords")]
+    public class when_invoked_with_a_fairly_long_string_and_random_length_ten_thousand_times
     {
         static string input = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum. It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like). There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet. It uses a dictionary of over 200 Latin words, combined with a handful of model sentence structures, to generate Lorem Ipsum which looks reasonable. The generated Lorem Ipsum is therefore always free from repetition, injected humour, or non-characteristic words etc.";
         static long elapsedMilliseconds;
 
-        Because of
-            = () =>
+        Because of = () =>
+            {
+                var random = new Random(DateTime.Now.Millisecond);
+                var timer = new Stopwatch();
+                timer.Start();
+                for (int i = 0; i < 10000; i++)
                 {
-                    var timer = new Stopwatch();
-                    timer.Start();
-                    for (int i = 0; i < 10000; i++)
-                    {
-                        input.CropWholeWords(input.Length - 10);
-                    }
-                    timer.Stop();
-                    elapsedMilliseconds = timer.ElapsedMilliseconds;
-                };
+                    input.CropWholeWords(random.Next(0, input.Length+10));
+                }
+                timer.Stop();
+                elapsedMilliseconds = timer.ElapsedMilliseconds;
+            };
 
-        It should_return_yellow = () =>
-                {
-                    throw new Exception(elapsedMilliseconds.ToString());
-                };
+        It should_require_less_than_50_milliseconds = () => elapsedMilliseconds.ShouldBeLessThan(50);
     }
 }
